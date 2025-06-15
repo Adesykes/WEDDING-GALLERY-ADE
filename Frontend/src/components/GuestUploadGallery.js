@@ -8,13 +8,15 @@ const MAX_UPLOADS = 30;
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
 
-export default function GuestGalleryUpload() {  const navigate = useNavigate();
+export default function GuestGalleryUpload() {
+  const navigate = useNavigate();
   const [photos, setPhotos] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
   const [loadingPhotos, setLoadingPhotos] = useState(true);
   const [lightboxImage, setLightboxImage] = useState(null);
+  const [scrollPosition, setScrollPosition] = useState(0);
 
   // Load photos initially (only for this guest)
   useEffect(() => {
@@ -294,22 +296,30 @@ export default function GuestGalleryUpload() {  const navigate = useNavigate();
       e.preventDefault();
       e.stopPropagation();
     }
+    // Store current scroll position
+    const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+    setScrollPosition(currentScroll);
+    
     setLightboxImage(imageUrl);
-    // No longer set previewImage separately, lightbox handles this
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
+    document.body.style.top = `-${currentScroll}px`;
   };
+
   // Handle closing the lightbox
   const closeLightbox = (e) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
-    setLightboxImage(null);
+    // Restore scroll position
     document.body.style.overflow = '';
     document.body.style.position = '';
     document.body.style.width = '';
+    document.body.style.top = '';
+    window.scrollTo(0, scrollPosition);
+    setLightboxImage(null);
   };
   // Handle clicking outside the lightbox to close it
   const handleLightboxClick = (e) => {

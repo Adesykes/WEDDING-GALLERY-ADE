@@ -715,9 +715,11 @@
   width: 100vw;
   height: 100vh;
   background: rgba(0, 0, 0, 0.95);
-  display:flex;
+  display: flex;
   justify-content: center;
   align-items: center;
+  overscroll-behavior: none;
+  touch-action: none;
   z-index: 9999;
   opacity: 0;
   visibility: hidden;
