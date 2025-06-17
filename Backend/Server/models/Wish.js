@@ -14,10 +14,10 @@ const wishSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
-  },
-  guestId: {
+  },  guestId: {
     type: String,
-    required: false
+    required: true,
+    index: true
   }
 });
 

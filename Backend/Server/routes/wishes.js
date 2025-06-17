@@ -8,15 +8,19 @@ router.get('/', async (req, res) => {
   try {
     const { guestId } = req.query;
     
+    // Always build query based on guestId, require guestId for non-admin route
+    if (!guestId) {
+      return res.status(400).json({ error: 'Guest ID is required' });
+    }
+    
+    const query = { guestId };
+    
     // Check if pagination is requested
     if (req.query.page || req.query.limit) {
       // Parse pagination parameters with defaults
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 10;
       const skip = (page - 1) * limit;
-      
-      // Build query based on guestId
-      const query = guestId ? { guestId } : {};
       
       // Count total documents for pagination metadata
       const total = await Wish.countDocuments(query);
@@ -37,10 +41,9 @@ router.get('/', async (req, res) => {
           pages: Math.ceil(total / limit),
           hasMore: skip + wishes.length < total
         }
-      });
-    } else {
-      // No pagination - return all wishes (original behavior)
-      const wishes = await Wish.find().sort({ createdAt: -1 });
+      });    } else {
+      // No pagination - return wishes for specific guest
+      const wishes = await Wish.find(query).sort({ createdAt: -1 });
       return res.json(wishes);
     }
   } catch (err) {
@@ -53,12 +56,11 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const { name, message, guestId } = req.body;
-    
-    // Basic validation
-    if (!name || !message) {
-      return res.status(400).json({ error: 'Name and message are required' });
+      // Basic validation
+    if (!name || !message || !guestId) {
+      return res.status(400).json({ error: 'Name, message, and guest ID are required' });
     }
-      if (message.length > 500) {
+    if (message.length > 500) {
       return res.status(400).json({ error: 'Message is too long (max 500 characters)' });
     }
     
