@@ -58,11 +58,11 @@ export default function GuestBook() {
   };
 
   // Load initial wishes
-  useEffect(() => {
-    const fetchWishes = async () => {
+  useEffect(() => {    const fetchWishes = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE}/api/wishes`);
+        const guestId = localStorage.getItem('guestId');
+        const response = await fetch(`${API_BASE}/api/wishes?guestId=${guestId}`);
         if (!response.ok) throw new Error('Failed to fetch wishes');
         
         const data = await response.json();
@@ -88,7 +88,8 @@ export default function GuestBook() {
     try {
       setLoadingMore(true);
       const nextPage = page + 1;
-      const response = await fetch(`${API_BASE}/api/wishes?page=${nextPage}&limit=${WISHES_PER_PAGE}`);
+      const guestId = localStorage.getItem('guestId');
+      const response = await fetch(`${API_BASE}/api/wishes?guestId=${guestId}&page=${nextPage}&limit=${WISHES_PER_PAGE}`);
       
       if (!response.ok) throw new Error('Failed to fetch more wishes');
       

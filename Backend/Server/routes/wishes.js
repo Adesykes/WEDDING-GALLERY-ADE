@@ -3,9 +3,11 @@ const router = express.Router();
 const Wish = require('../models/Wish');
 const { containsProfanity, cleanProfanity } = require('../utils/profanityFilter');
 
-// GET /api/wishes - Get all wishes/comments (with optional pagination)
+// GET /api/wishes - Get wishes with proper scoping
 router.get('/', async (req, res) => {
   try {
+    const { guestId } = req.query;
+    
     // Check if pagination is requested
     if (req.query.page || req.query.limit) {
       // Parse pagination parameters with defaults
@@ -13,11 +15,14 @@ router.get('/', async (req, res) => {
       const limit = parseInt(req.query.limit) || 10;
       const skip = (page - 1) * limit;
       
-      // Count total documents for pagination metadata
-      const total = await Wish.countDocuments();
+      // Build query based on guestId
+      const query = guestId ? { guestId } : {};
       
-      // Fetch wishes with pagination
-      const wishes = await Wish.find()
+      // Count total documents for pagination metadata
+      const total = await Wish.countDocuments(query);
+      
+      // Fetch wishes with pagination and proper scoping
+      const wishes = await Wish.find(query)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
